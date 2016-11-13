@@ -9,6 +9,12 @@
 import Foundation
 import Node
 
+let kID = "ID"
+let kTitle = "title"
+let kText = "text"
+let kImageShort = "img"
+
+
 class FAPLPost {
     let ID : Int
     var imgPath : String?
@@ -23,12 +29,12 @@ class FAPLPost {
     }
     
     func makeJSONString() -> String {
-        var jsonDict = ["ID" : "\(ID)",
-                        "title" : title,
-                        "text" : text]
+        var jsonDict = [kID : "\(ID)",
+                        kTitle : title,
+                        kText : text]
         
         if let imgPath = self.imgPath {
-            jsonDict["img"] = imgPath
+            jsonDict[kImageShort] = imgPath
         }
         
         let JSONdata = try! JSONSerialization.data(withJSONObject: jsonDict, options: .prettyPrinted)
@@ -37,12 +43,12 @@ class FAPLPost {
     }
     
     func makeNode() -> Node {
-        var nodeDict = ["ID" : Node.init(self.ID),
-            "title" : Node.init(title),
-            "text" : Node.init(text)]
+        var nodeDict = [kID : Node.init(self.ID),
+            kTitle : Node.init(title),
+            kText : Node.init(text)]
         
         if let imgPath = self.imgPath {
-            nodeDict["img"] = Node.init(imgPath)
+            nodeDict[kImageShort] = Node.init(imgPath)
         }
         
         return Node.init(nodeDict)
