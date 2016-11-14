@@ -5,21 +5,26 @@ import Transport
 
 let drop = Droplet()
 let parser = FAPLParser()
+let configDirectory = drop.workDir.finished(with: "/") + "Config/secrets/"
+let credentialsJSON = FAPLCredentials.init(credentialPath: configDirectory)
 
 //MARK: Email
 
-func sendEmail() -> () {
-    let credentials = SMTPCredentials(user: "roudique", pass: "Jqegervsrw18")
+func sendEmail(to: String, subject: String, body: String) -> () {
+    guard let smtpUsername = credentialsJSON.smtp.username,
+        let smtpPassword = credentialsJSON.smtp.password else {
+        return
+    }
+    
+    let credentials = SMTPCredentials(user: smtpUsername,
+                                      pass: smtpPassword)
     let from = "roudique@gmail.com"
-    let to = "panzerfauster.wot@gmail.com"
-    
-    
-    
+
     let email = Email(
         from: from,
         to: to,
-        subject: "Vapor SMTP - Simple",
-        body: "Hello from Vapor SMTP 👋"
+        subject: subject,
+        body: body
     )
     
     // MARK: Send
@@ -46,14 +51,10 @@ drop.get("post", ":number") { request in
     let responseDict = ["status" : Node.init("error"),
                         "error" : Node.init("Post not found")]
     
-    sendEmail()
+    sendEmail(to: "roudique@gmail.com", subject: "FAPL server", body: "Holy crap, someone requested post that was not found!")
     
     return try! JSON(node: Node.init(responseDict))
 }
-
-
-
-
 
 
 drop.run()
