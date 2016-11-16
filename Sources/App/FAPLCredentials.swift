@@ -17,8 +17,6 @@ class FAPLCredentials {
     var smtp = FAPLSMTP()
     
     init(credentialPath: String) {
-        
-//        if let credentialPath = Bundle.main.path(forResource: "credentials", ofType: "json") {
             let credentialURL = URL.init(fileURLWithPath: credentialPath + "credentials.json")
             do {
                 let credentialData = try Data.init(contentsOf: credentialURL)
@@ -32,10 +30,6 @@ class FAPLCredentials {
             } catch {
                 print("Error parsing credentials JSON!")
             }
-            
-//        } else {
-//            print("Error with credentials JSON! Can't find credentials.json in bundle.")
-//        }
     }
     
     

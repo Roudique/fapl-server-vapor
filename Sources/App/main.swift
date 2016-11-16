@@ -27,34 +27,41 @@ func sendEmail(to: String, subject: String, body: String) -> () {
         body: body
     )
     
-    // MARK: Send
-    
     let client = try! SMTPClient<TCPClientStream>.makeSendGridClient()
     let (code, reply) = try! client.send(email, using: credentials)
     print("Successfully sent email: \(code) \(reply)")
     
 }
 
-//Mark: GET methods
+//MARK: GET methods
 
 drop.get("post", ":number") { request in
     if let ID = request.parameters["number"]?.int {
         if let post = parser.post(ID: ID) {
-            let postNode = post.makeNode()
-            let statusNode = Node.init(["status" : Node.init("ok")])
+            let json = try? JSON(node: [
+                "status": "ok",
+                "data" : Node.init(post.makeNodesDict())
+                ])
             
-            let responseNode = Node.init(arrayLiteral: postNode, statusNode)
-            
-            return try! JSON(node: responseNode)
+            if let jsonResponse = json {
+                return jsonResponse
+            }
+            return try JSON(node: [
+                "status" : "error",
+                "error" : "Error parsing post content"])
         }
     }
     let responseDict = ["status" : Node.init("error"),
                         "error" : Node.init("Post not found")]
     
-    sendEmail(to: "roudique@gmail.com", subject: "FAPL server", body: "Holy crap, someone requested post that was not found!")
+    sendEmail(to:      "roudique@gmail.com",
+              subject: "FAPL server error",
+              body:    "Holy crap, someone requested post that was not found!")
     
     return try! JSON(node: Node.init(responseDict))
 }
+
+
 
 
 drop.run()
