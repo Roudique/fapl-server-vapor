@@ -9,6 +9,7 @@ let drop = Droplet()
 let parser = FAPLParser()
 let configDirectory = drop.workDir.finished(with: "/") + "Config/secrets/"
 let credentialsJSON = FAPLCredentials.init(credentialPath: configDirectory)
+let apiManager = FAPLAPIManager.init(droplet: drop)
 
 //MARK: Email
 
@@ -39,7 +40,16 @@ func sendEmail(to: String, subject: String, body: String) -> () {
 
 drop.get("post", ":number") { request in
     if let ID = request.parameters["number"]?.int {
-        if let post = parser.post(ID: ID) {
+        var faplPost : FAPLPost?
+        apiManager.getPost(id: ID, completion: { foundPost in
+            if let post = foundPost.extract() {
+                print(post.title)
+                faplPost = post
+            }
+            
+        })
+        
+        if let post = faplPost {
             let json = try? JSON(node: [
                 "status": "ok",
                 "data" : Node.init(post.makeNodesDict())
@@ -52,6 +62,7 @@ drop.get("post", ":number") { request in
                 "status" : "error",
                 "error" : "Error parsing post content"])
         }
+        
     }
     let responseDict = ["status" : Node.init("error"),
                         "error" : Node.init("Post not found")]
@@ -63,35 +74,8 @@ drop.get("post", ":number") { request in
     return try! JSON(node: Node.init(responseDict))
 }
 
-if let response = try? drop.client.get("http://fapl.ru/posts/99/") {
-    switch response.body {
-    case Body.data :
-        if let body = response.body.bytes {
-            if let parsed = String.init(bytes: body, encoding: .windowsCP1251) {
-                
-                if let doc = HTML(html: parsed, encoding: .windowsCP1251) {
-                    print(doc.title ?? "")
-                    
-                    // Search for nodes by CSS
-                    for link in doc.css("div[class^='block']") {
-                        
-                            print("Parent of class: \(link.parent?.className)")
-                            print("Class of element: \(link.className)")
-                            print("Text of element : \(link.text)")
-                            print("----------------------")
-                        
-                    }
-                }
-                
-            }
-        }
-    case Body.chunked : print("chunked")
-    }
-
-} else {
-    print("request failed")
-}
-
 drop.run()
+
+
 
 
