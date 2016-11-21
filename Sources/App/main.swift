@@ -2,6 +2,8 @@ import Vapor
 import Foundation
 import SMTP
 import Transport
+import HTTP
+import Kanna
 
 let drop = Droplet()
 let parser = FAPLParser()
@@ -61,8 +63,34 @@ drop.get("post", ":number") { request in
     return try! JSON(node: Node.init(responseDict))
 }
 
+if let response = try? drop.client.get("http://fapl.ru/posts/99/") {
+    switch response.body {
+    case Body.data :
+        if let body = response.body.bytes {
+            if let parsed = String.init(bytes: body, encoding: .windowsCP1251) {
+                
+                if let doc = HTML(html: parsed, encoding: .windowsCP1251) {
+                    print(doc.title ?? "")
+                    
+                    // Search for nodes by CSS
+                    for link in doc.css("div[class^='block']") {
+                        
+                            print("Parent of class: \(link.parent?.className)")
+                            print("Class of element: \(link.className)")
+                            print("Text of element : \(link.text)")
+                            print("----------------------")
+                        
+                    }
+                }
+                
+            }
+        }
+    case Body.chunked : print("chunked")
+    }
 
-
+} else {
+    print("request failed")
+}
 
 drop.run()
 
