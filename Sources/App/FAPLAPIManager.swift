@@ -13,7 +13,7 @@ import Transport
 import HTTP
 import Kanna
 
-let faplAPIString = "http://fapl.ru/posts/"
+let kFaplAPIString = "http://fapl.ru/posts/"
 
 class FAPLAPIManager {
     var droplet : Droplet
@@ -25,8 +25,9 @@ class FAPLAPIManager {
     func getPost(id: Int, completion: (FAPLPost?) -> Void) {
         var postName : String?
         var postText : String?
+        var postImg  : String?
         
-        if let response = try? drop.client.get("\(faplAPIString)/\(id)") {
+        if let response = try? drop.client.get("\(kFaplAPIString)/\(id)") {
             switch response.body {
             case Body.data :
                 if let body = response.body.bytes {
@@ -35,25 +36,41 @@ class FAPLAPIManager {
                         if let doc = HTML(html: parsed, encoding: .windowsCP1251) {
                             
                             //parse name of post
-                            for link in doc.css("h2") {
-                                if link.parent?.className == "block" {
-                                    if let name = link.text {
+                            for header in doc.css("h2") {
+                                if header.parent?.className == "block" {
+                                    if let name = header.text {
                                         postName = name
                                         break
                                     }
                                 }
                             }
                             
+                            var images = [String]()
+                            
                             // parse text of post
-                            for link in doc.css("div[class^='content']") {
-                                if link.parent?.className == "block" {
-                                    if let text = link.text {
+                            for content in doc.css("div[class^='content']") {
+                                if content.parent?.className == "block" {
+                                    if let text = content.text {
                                         postText = text
+                                        
+                                        //parse image of post
+                                        let paragraphsSet = content.css("p")
+                                        for paragraph in paragraphsSet.array {
+                                            let imagesSet = paragraph.css("img")
+                                            
+                                            for image in imagesSet.array {
+                                                if let imagePath = image["src"] {
+                                                    images.append(imagePath)
+                                                }
+                                            }
+                                        }
+                                        
                                         break
                                     }
                                 }
                             }
                             print(postName ?? "Post name doesn't exist for post #\(id)")
+                            
                             
                             var textString = ""
                             if let paragraphs = postText?.components(separatedBy: "\n") {
@@ -68,10 +85,10 @@ class FAPLAPIManager {
                             print(textString)
                             
                             if let name = postName, let text = postText {
-                                completion( FAPLPost.init(ID: id, imgPath: nil, title: name, text: text) )
+                                completion( FAPLPost.init(ID: id, imgPath: images.first, title: name, text: text) )
                                 return;
                             } else {
-                                print("Error parsin HTML:\n")
+                                print("Error parsing HTML:\n")
                                 if postName == nil {
                                     print("-- no post name found;")
                                 }

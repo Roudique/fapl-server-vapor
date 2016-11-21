@@ -29,8 +29,14 @@ class FAPLPost {
     }
     
     func makeNodesDict() -> [String : Node] {
-        return [kID    : Node.init("\(ID)"),
-                kTitle : Node.init(title),
-                kText  : Node.init(text)]
+        var nodesDict = [kID    : Node.init("\(ID)"),
+                         kTitle : Node.init(title),
+                         kText  : Node.init(text)]
+        
+        if let imgPath = self.imgPath {
+            nodesDict[kImageShort] = Node.init(imgPath)
+        }
+        
+        return nodesDict
     }
 }
