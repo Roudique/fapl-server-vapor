@@ -23,7 +23,7 @@ class FAPLParser {
     
     func post(ID : Int) -> FAPLPost? {
         for post in posts {
-            if post.ID == ID {
+            if post.id?.int == ID {
                 return post
             }
         }

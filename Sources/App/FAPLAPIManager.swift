@@ -25,7 +25,6 @@ class FAPLAPIManager {
     func getPost(id: Int, completion: (FAPLPost?) -> Void) {
         var postName : String?
         var postText : String?
-        var postImg  : String?
         
         if let response = try? drop.client.get("\(kFaplAPIString)/\(id)") {
             switch response.body {
