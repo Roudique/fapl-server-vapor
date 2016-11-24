@@ -11,7 +11,7 @@ import Foundation
 import SMTP
 import Transport
 import HTTP
-import Kanna
+import Scrape
 
 let kFaplAPIString = "http://fapl.ru/posts/"
 
@@ -32,42 +32,65 @@ class FAPLAPIManager {
                 if let body = response.body.bytes {
                     if let parsed = String.init(bytes: body, encoding: .windowsCP1251) {
                         
-                        if let doc = HTML(html: parsed, encoding: .windowsCP1251) {
+                        if let doc = HTMLDocument(html: parsed, encoding: .windowsCP1251) {
                             
                             //parse name of post
-                            for header in doc.css("h2") {
-                                if header.parent?.className == "block" {
-                                    if let name = header.text {
-                                        postName = name
-                                        break
+                            let header = doc.search(byCSSSelector: "h2")
+                            switch header {
+                            case .nodeSet(let headers):
+                                for headerXML in headers {
+                                    if headerXML.parent?.className == "block" {
+                                        postName = headerXML.text
                                     }
                                 }
+                            default:
+                                break;
                             }
-                            
+//                            
                             var images = [String]()
                             
-                            // parse text of post
-                            for content in doc.css("div[class^='content']") {
-                                if content.parent?.className == "block" {
-                                    if let text = content.text {
-                                        postText = text
-                                        
-                                        //parse image of post
-                                        let paragraphsSet = content.css("p")
-                                        for paragraph in paragraphsSet.array {
-                                            let imagesSet = paragraph.css("img")
+                            let content = doc.search(byCSSSelector: "div[class^='content']")
+                            
+                            //[arse text of post
+                            switch content {
+                            case .nodeSet(let contentSet):
+                                for content in contentSet {
+                                    if content.parent?.className == "block" {
+                                        if let text = content.text {
+                                            postText = text
                                             
-                                            for image in imagesSet.array {
-                                                if let imagePath = image["src"] {
-                                                    images.append(imagePath)
-                                                }
-                                            }
+                                            
+                                            
+                                            break
                                         }
-                                        
-                                        break
                                     }
                                 }
+                            default:
+                                break;
                             }
+//                            
+//                            // parse text of post
+//                            for content in doc.css("div[class^='content']") {
+//                                if content.parent?.className == "block" {
+//                                    if let text = content.text {
+//                                        postText = text
+//                                        
+//                                        //parse image of post
+//                                        let paragraphsSet = content.css("p")
+//                                        for paragraph in paragraphsSet.array {
+//                                            let imagesSet = paragraph.css("img")
+//                                            
+//                                            for image in imagesSet.array {
+//                                                if let imagePath = image["src"] {
+//                                                    images.append(imagePath)
+//                                                }
+//                                            }
+//                                        }
+//                                        
+//                                        break
+//                                    }
+//                                }
+//                            }
                             print(postName ?? "Post name doesn't exist for post #\(id)")
                             
                             

@@ -3,7 +3,7 @@ import Foundation
 import SMTP
 import Transport
 import HTTP
-import Kanna
+import Scrape
 
 let drop = Droplet()
 let parser = FAPLParser()
