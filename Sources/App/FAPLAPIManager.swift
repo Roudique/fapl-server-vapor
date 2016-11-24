@@ -35,7 +35,7 @@ class FAPLAPIManager {
                         if let doc = HTMLDocument(html: parsed, encoding: .windowsCP1251) {
                             
                             //parse name of post
-                            let header = doc.search(byCSSSelector: "h2")
+                            let header = doc.search(byXPath: "//h2")
                             switch header {
                             case .nodeSet(let headers):
                                 for headerXML in headers {
@@ -49,7 +49,7 @@ class FAPLAPIManager {
 //                            
                             var images = [String]()
                             
-                            let content = doc.search(byCSSSelector: "div[class^='content']")
+                            let content = doc.search(byXPath: "//div[@class='content']")
                             
                             //[arse text of post
                             switch content {
