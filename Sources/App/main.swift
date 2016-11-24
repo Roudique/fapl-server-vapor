@@ -43,7 +43,6 @@ drop.get("post", ":number") { request in
         var faplPost : FAPLPost?
         apiManager.getPost(id: ID, completion: { foundPost in
             if let post = foundPost.extract() {
-                print(post.title)
                 faplPost = post
             }
             

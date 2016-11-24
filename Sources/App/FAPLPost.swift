@@ -41,10 +41,10 @@ class FAPLPost : Model {
     
     //MARK: - Preparation
     static func prepare(_ database: Database) throws {
-        
+        assertionFailure("prepare(_ database: Database) not implemented!")
     }
     static func revert(_ database: Database) throws {
-        
+        assertionFailure("revert(_ database: Database) not implemented!")
     }
     
     //MARK: - NodeRepresentable

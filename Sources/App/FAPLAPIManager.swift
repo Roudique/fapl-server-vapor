@@ -75,14 +75,11 @@ class FAPLAPIManager {
                             if let paragraphs = postText?.components(separatedBy: "\n") {
                                 for textItem in paragraphs {
                                     if textItem.count > 0 {
-                                        print(textItem)
                                         textString.append(textItem)
                                     }
                                 }
                             }
-                            
-                            print(textString)
-                            
+                                                        
                             if let name = postName, let text = postText {
                                 completion( FAPLPost.init(ID: id, imgPath: images.first, title: name, text: text) )
                                 return;
