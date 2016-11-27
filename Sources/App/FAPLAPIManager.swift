@@ -46,12 +46,12 @@ class FAPLAPIManager {
                             default:
                                 break;
                             }
-//                            
-                            let images = [String]()
+
+                            var images = [String]()
                             
                             let content = doc.search(byXPath: "//div[@class='content']")
                             
-                            //[arse text of post
+                            //parse text of post
                             switch content {
                             case .nodeSet(let contentSet):
                                 for content in contentSet {
@@ -59,7 +59,17 @@ class FAPLAPIManager {
                                         if let text = content.text {
                                             postText = text
                                             
-                                            
+                                            //parse image of post
+                                            let paragraphsSet = content.search(byCSSSelector: "p")
+                                            for paragraph in paragraphsSet.array {
+                                                let imagesSet = paragraph.search(byCSSSelector: "img")
+
+                                                for image in imagesSet.array {
+                                                    if let imagePath = image["src"] {
+                                                        images.append(imagePath)
+                                                    }
+                                                }
+                                            }
                                             
                                             break
                                         }
@@ -68,29 +78,7 @@ class FAPLAPIManager {
                             default:
                                 break;
                             }
-//                            
-//                            // parse text of post
-//                            for content in doc.css("div[class^='content']") {
-//                                if content.parent?.className == "block" {
-//                                    if let text = content.text {
-//                                        postText = text
-//                                        
-//                                        //parse image of post
-//                                        let paragraphsSet = content.css("p")
-//                                        for paragraph in paragraphsSet.array {
-//                                            let imagesSet = paragraph.css("img")
-//                                            
-//                                            for image in imagesSet.array {
-//                                                if let imagePath = image["src"] {
-//                                                    images.append(imagePath)
-//                                                }
-//                                            }
-//                                        }
-//                                        
-//                                        break
-//                                    }
-//                                }
-//                            }
+                            
                             print(postName ?? "Post name doesn't exist for post #\(id)")
                             
                             
@@ -106,7 +94,6 @@ class FAPLAPIManager {
 //                            }
                                                         
                             if let name = postName, let text = postText {
-				print("almost there, doing completion")
                                 completion( FAPLPost.init(ID: id, imgPath: images.first, title: name, text: text) )
                                 return;
                             } else {
