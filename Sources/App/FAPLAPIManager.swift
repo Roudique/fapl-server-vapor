@@ -24,7 +24,6 @@ class FAPLAPIManager {
     
     func getPost(id: Int, completion: (FAPLPost?) -> Void) {
         var postName : String?
-        var postText : String?
         
         if let response = try? drop.client.get("\(kFaplAPIString)/\(id)") {
             switch response.body {
@@ -47,7 +46,8 @@ class FAPLAPIManager {
                                 break;
                             }
 
-                            var images = [String]()
+                            var items = [String]()
+                            var logoImage : String?
                             
                             let content = doc.search(byXPath: "//div[@class='content']")
                             
@@ -56,23 +56,35 @@ class FAPLAPIManager {
                             case .nodeSet(let contentSet):
                                 for content in contentSet {
                                     if content.parent?.className == "block" {
-                                        if let text = content.text {
-                                            postText = text
+                                        for element in content.search(byXPath: "p").array {
+                                            let images = element.search(byCSSSelector: "img")
+                                            logoImage = images.first?["src"]
+                                            if logoImage != nil {
+                                                print("Logo image: \(logoImage)\n")
+                                            }
                                             
-                                            //parse image of post
-                                            let paragraphsSet = content.search(byCSSSelector: "p")
-                                            for paragraph in paragraphsSet.array {
-                                                let imagesSet = paragraph.search(byCSSSelector: "img")
-
-                                                for image in imagesSet.array {
-                                                    if let imagePath = image["src"] {
-                                                        images.append(imagePath)
-                                                    }
+                                            if images.count > 1 {
+                                                for i in 1...images.count-1 {
+                                                    print("Image: \(images.array[i]["src"])")
                                                 }
                                             }
                                             
-                                            break
+                                            
+                                            if let paragraphItem = element.content {
+                                                let separatedParagraphs = paragraphItem.components(separatedBy: CharacterSet.controlCharacters)
+                                                var paragraphs = [String]()
+                                                for paragraph in separatedParagraphs {
+                                                    if !paragraph.isEmpty {
+                                                        paragraphs.append(paragraph)
+                                                        print("Paragraph: \(paragraph)")
+
+                                                    }
+                                                }
+                                                
+                                                items.append(contentsOf: paragraphs)
+                                            }
                                         }
+                                        
                                     }
                                 }
                             default:
@@ -81,28 +93,13 @@ class FAPLAPIManager {
                             
                             print(postName ?? "Post name doesn't exist for post #\(id)")
                             
-                            
-//                            var textString = ""
-//print("Trying to separate components")
-//                            if let paragraphs = postText?.components(separatedBy: "\n") {
-//                                print("parsing text")
-//				for textItem in paragraphs {
-//                                    if textItem.count > 0 {
-//                                        textString.append(textItem)
-//                                    }
-//                                }
-//                            }
-                                                        
-                            if let name = postName, let text = postText {
-                                completion( FAPLPost.init(ID: id, imgPath: images.first, title: name, text: text) )
+                            if let name = postName {
+                                completion( FAPLPost.init(ID: id, imgPath: logoImage, title: name, paragraphs: items) )
                                 return;
                             } else {
                                 print("Error parsing HTML:\n")
                                 if postName == nil {
                                     print("-- no post name found;")
-                                }
-                                if postText == nil {
-                                    print("-- no post text found;")
                                 }
                             }
                             

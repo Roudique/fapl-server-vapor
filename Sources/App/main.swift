@@ -6,14 +6,14 @@ import HTTP
 import Scrape
 
 let drop = Droplet()
-let parser = FAPLParser()
 let configDirectory = drop.workDir.finished(with: "/") + "Config/secrets/"
 let credentialsJSON = FAPLCredentials.init(credentialPath: configDirectory)
 let apiManager = FAPLAPIManager.init(droplet: drop)
 
 //MARK: Email
 
-func sendEmail(to: String, subject: String, body: String) -> () {
+func sendEmail(to: String, subject: String, body: String) {
+    guard let adminEmail = credentialsJSON.adminEmail else { return }
     guard let smtpUsername = credentialsJSON.smtp.username,
         let smtpPassword = credentialsJSON.smtp.password else {
         return
@@ -21,11 +21,11 @@ func sendEmail(to: String, subject: String, body: String) -> () {
     
     let credentials = SMTPCredentials(user: smtpUsername,
                                       pass: smtpPassword)
-    let from = "roudique@gmail.com"
+    let from = "fapl server"
 
     let email = Email(
         from: from,
-        to: to,
+        to: adminEmail,
         subject: subject,
         body: body
     )
@@ -44,12 +44,10 @@ drop.get("post", ":number") { request in
         apiManager.getPost(id: ID, completion: { foundPost in
             if let post = foundPost.extract() {
                 faplPost = post
-		print("post exists")
             }
             
         })
         
-print("trying to answer...")
         if let post = faplPost {
             let json = try? JSON(node: [
                 "status": "ok",
@@ -59,20 +57,17 @@ print("trying to answer...")
             if let jsonResponse = json {
                 return jsonResponse
             }
-            return try JSON(node: [
-                "status" : "error",
-                "error" : "Error parsing post content"])
+            return JSON.error(withMessage: "Error parsing post content.")
         }
         
+        sendEmail(to:      "roudique@gmail.com",
+                  subject: "FAPL server error",
+                  body:    "Holy crap, server failed to request post #\(ID)!")
+        
+        return JSON.error(withMessage: "Post not found.")
     }
-    let responseDict = ["status" : Node.init("error"),
-                        "error" : Node.init("Post not found")]
     
-    sendEmail(to:      "roudique@gmail.com",
-              subject: "FAPL server error",
-              body:    "Holy crap, someone requested post that was not found!")
-    
-    return try! JSON(node: Node.init(responseDict))
+    return JSON.error(withMessage: "Error parsing post number from request.")
 }
 
 drop.run()

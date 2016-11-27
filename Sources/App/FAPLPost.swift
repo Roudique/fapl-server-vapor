@@ -13,6 +13,7 @@ import Vapor
 let kID         = "id"
 let kTitle      = "title"
 let kText       = "text"
+let kParagraphs = "paragraphs"
 let kImageShort = "img"
 
 
@@ -22,21 +23,20 @@ class FAPLPost : Model {
     
     var imgPath : String?
     var title : String
-    var text : String
     var timestamp : Int?
+    var paragraphs = [String]()
     
-    init(ID: Int, imgPath: String?, title: String, text: String) {
+    init(ID: Int, imgPath: String?, title: String, paragraphs: [String]) {
         self.id = Node.init(ID);
         self.title = title
-        self.text = text
         self.imgPath = imgPath
+        self.paragraphs = paragraphs
     }
     
     //MARK: - NodeInitializable
     required init(node: Node, in context: Context) throws {
         id = try node.extract(kID)
         title = try node.extract(kTitle)
-        text = try node.extract(kText)
     }
     
     //MARK: - Preparation
@@ -52,8 +52,7 @@ class FAPLPost : Model {
     func makeNode() throws -> Node {
         return try Node(node: [
             kID: id,
-            kTitle: title,
-            kText: text
+            kTitle: title
             ])
     }
     
@@ -64,9 +63,15 @@ class FAPLPost : Model {
     //MARK: - Public
     
     func makeNodesDict() -> [String : Node] {
+        var paragraphNodes = [Node]()
+        for paragraph in self.paragraphs {
+            paragraphNodes.append(Node.init(stringLiteral: paragraph))
+        }
+        
+        
         var nodesDict = [kID    : id!,
                          kTitle : Node.init(title),
-                         kText  : Node.init(text)]
+                         kParagraphs : Node.init(paragraphNodes)]
         
         if let imgPath = self.imgPath {
             nodesDict[kImageShort] = Node.init(imgPath)

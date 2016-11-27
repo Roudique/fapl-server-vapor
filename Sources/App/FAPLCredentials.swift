@@ -14,6 +14,8 @@ class FAPLCredentials {
         var password : String?
     }
     
+    var adminEmail : String?
+    
     var smtp = FAPLSMTP()
     
     init(credentialPath: String) {
