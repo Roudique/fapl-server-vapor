@@ -44,10 +44,12 @@ drop.get("post", ":number") { request in
         apiManager.getPost(id: ID, completion: { foundPost in
             if let post = foundPost.extract() {
                 faplPost = post
+		print("post exists")
             }
             
         })
         
+print("trying to answer...")
         if let post = faplPost {
             let json = try? JSON(node: [
                 "status": "ok",

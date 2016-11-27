@@ -47,7 +47,7 @@ class FAPLAPIManager {
                                 break;
                             }
 //                            
-                            var images = [String]()
+                            let images = [String]()
                             
                             let content = doc.search(byXPath: "//div[@class='content']")
                             
@@ -94,16 +94,19 @@ class FAPLAPIManager {
                             print(postName ?? "Post name doesn't exist for post #\(id)")
                             
                             
-                            var textString = ""
-                            if let paragraphs = postText?.components(separatedBy: "\n") {
-                                for textItem in paragraphs {
-                                    if textItem.count > 0 {
-                                        textString.append(textItem)
-                                    }
-                                }
-                            }
+//                            var textString = ""
+//print("Trying to separate components")
+//                            if let paragraphs = postText?.components(separatedBy: "\n") {
+//                                print("parsing text")
+//				for textItem in paragraphs {
+//                                    if textItem.count > 0 {
+//                                        textString.append(textItem)
+//                                    }
+//                                }
+//                            }
                                                         
                             if let name = postName, let text = postText {
+				print("almost there, doing completion")
                                 completion( FAPLPost.init(ID: id, imgPath: images.first, title: name, text: text) )
                                 return;
                             } else {
