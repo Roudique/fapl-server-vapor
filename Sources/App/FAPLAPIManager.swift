@@ -57,7 +57,7 @@ class FAPLAPIManager {
                                 for content in contentSet {
                                     if content.parent?.className == "block" {
                                         for element in content.search(byXPath: "p").array {
-                                            let images = element.search(byCSSSelector: "img")
+                                            let images = element.search(byXPath: "img")
                                             logoImage = images.first?["src"]
                                             if logoImage != nil {
                                                 print("Logo image: \(logoImage)\n")
