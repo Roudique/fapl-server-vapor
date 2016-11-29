@@ -71,7 +71,11 @@ class FAPLAPIManager {
                                             
                                             
                                             if let paragraphItem = element.content {
-                                                let separatedParagraphs = paragraphItem.components(separatedBy: CharacterSet.controlCharacters)
+                                                let omittedParagraphItem = paragraphItem.replacingOccurrences(of: "\r", with: "[RPL]")
+                                                let doubleOmittedItem = omittedParagraphItem.replacingOccurrences(of: "\n", with: "[RPL]")
+                                                let trippleOmittedItem = doubleOmittedItem.replacingOccurrences(of: "\t", with: "[RPL]")
+                                                
+                                                let separatedParagraphs = trippleOmittedItem.components(separatedBy: CharacterSet.init(charactersIn: "[RPL]"))
                                                 var paragraphs = [String]()
                                                 for paragraph in separatedParagraphs {
                                                     if !paragraph.isEmpty {
