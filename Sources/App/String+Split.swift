@@ -10,7 +10,7 @@ import Foundation
 
 extension String {
     
-    func split(delimiter: CharacterSet) -> Array<String> {
+    func split(delimiter: CharacterSet, needEmpty: Bool = true) -> Array<String> {
         var array = [String]()
         var currentIndex = 0
         
@@ -28,8 +28,9 @@ extension String {
             array.append(substring(from: currentIndex, to: self.unicodeScalars.count))
         }
         
-        
-        return array
+        return array.filter({ string in
+            !string.isEmpty || needEmpty
+        })
     }
     
     fileprivate func substring(from: Int, to: Int) -> String {

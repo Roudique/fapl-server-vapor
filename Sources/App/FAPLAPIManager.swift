@@ -112,11 +112,25 @@ class FAPLAPIManager {
                                 break
                             }
                             
+                            let dateXPath = doc.search(byXPath: "//p[@class='date f-r']")
+                            var timestamp : Int?
+                            switch dateXPath {
+                            case .nodeSet(let dateNodeSet):
+                                if let dateTimeString = dateNodeSet.first?.content {
+                                    if let date = parse(date: dateTimeString) {
+                                        timestamp = Int(date.timeIntervalSince1970)
+                                    }
+                                }
+                            default:
+                                break
+                            }
+                            
                             print(postName ?? "Post name doesn't exist for post #\(id)")
                             
                             if let name = postName {
                                 let post = FAPLPost.init(ID: id, imgPath: logoImage, title: name, paragraphs: items)
                                 post.tags = tags
+                                post.timestamp = timestamp
                                 completion(post)
                                 return;
                             } else {
@@ -139,4 +153,20 @@ class FAPLAPIManager {
         }
         completion(nil)
     }
+}
+
+func parse(date: String) -> Date? {
+    let components = date.split(delimiter: .init(charactersIn: " "), needEmpty: false)
+    let comp = (components.first, components.last)
+    if let dateString = comp.0, let timeString = comp.1 {
+        let fullDateString = "\(dateString) \(timeString)"
+        
+        let moscowGMTTimeDifference = 60 * 60 * 3
+        let dateFormatter = DateFormatter()
+        dateFormatter.timeZone = TimeZone.init(secondsFromGMT: moscowGMTTimeDifference)
+        dateFormatter.dateFormat = "dd.MM.yyyy hh:mm"
+        return dateFormatter.date(from: fullDateString)
+    }
+    
+    return nil
 }

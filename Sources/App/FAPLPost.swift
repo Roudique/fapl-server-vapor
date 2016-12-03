@@ -16,16 +16,19 @@ let kText       = "text"
 let kParagraphs = "paragraphs"
 let kImageShort = "img"
 let kTags       = "tags"
+let kTimestamp  = "timestamp"
 
 class FAPLPost : Model {
     var id : Node?
     var exists: Bool = false
     
-    var imgPath : String?
-    var title : String
-    var timestamp : Int?
-    var paragraphs = [String]()
-    var tags       = [String]()
+    var imgPath     : String?
+    var title       : String
+    
+    var timestamp   : Int?
+    
+    var paragraphs  = [String]()
+    var tags        = [String]()
     
     init(ID: Int, imgPath: String?, title: String, paragraphs: [String]) {
         self.id = Node.init(ID);
@@ -81,6 +84,10 @@ class FAPLPost : Model {
         
         if let imgPath = self.imgPath {
             nodesDict[kImageShort] = Node.init(imgPath)
+        }
+        
+        if let timestamp = self.timestamp {
+            nodesDict[kTimestamp] = Node.init(timestamp)
         }
         
         return nodesDict
