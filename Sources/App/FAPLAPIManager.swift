@@ -89,13 +89,35 @@ class FAPLAPIManager {
                                     }
                                 }
                             default:
-                                break;
+                                break
+                            }
+                            
+                            var tags = [String]()
+                            let tagsXPath = doc.search(byXPath: "//p[@class='tags']")
+                            switch tagsXPath {
+                            case .nodeSet(let tagsSet):
+                                for tag in tagsSet {
+                                    if let tagString = tag.content {
+                                        var tagsArray = tagString.split(delimiter: CharacterSet.init(charactersIn: ",")).filter({ string in
+                                            !string.isEmpty
+                                        })
+                                        tagsArray = tagsArray.map({ str in
+                                            return str.trim()
+                                        })
+                                        
+                                        tags.append(contentsOf: tagsArray)
+                                    }
+                                }
+                            default:
+                                break
                             }
                             
                             print(postName ?? "Post name doesn't exist for post #\(id)")
                             
                             if let name = postName {
-                                completion( FAPLPost.init(ID: id, imgPath: logoImage, title: name, paragraphs: items) )
+                                let post = FAPLPost.init(ID: id, imgPath: logoImage, title: name, paragraphs: items)
+                                post.tags = tags
+                                completion(post)
                                 return;
                             } else {
                                 print("Error parsing HTML:\n")
